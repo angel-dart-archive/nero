@@ -21,7 +21,10 @@ class Response {
   factory Response.file(File file) => new _FileResponse(file);
   factory Response.html(String html) => new _HtmlResponse(html);
   factory Response.text(String text) => new _TextResponse(text);
-  factory Response.json(data) => new _JsonResponse(data);
+  factory Response.json(data, {bool useGod: true}) =>
+      new _JsonResponse(data, useGod: useGod);
+  factory Response.jsonp(String callbackName, data, {bool useGod: true}) =>
+      new _JsonpResponse(callbackName, data, useGod: useGod);
   factory Response.redirect(String to, {int code}) =>
       new _RedirectResponse(to, code: code);
   factory Response.route(Route to, [Map params]) =>
@@ -77,6 +80,24 @@ class _JsonResponse extends Response {
   Future send(HttpResponse response) async {
     await super.send(response);
     response.write(useGod ? god.serialize(data) : JSON.encode(data));
+  }
+}
+
+class _JsonpResponse extends Response {
+  final String callbackName;
+  final dynamic data;
+  final bool useGod;
+
+  _JsonpResponse(this.callbackName, this.data, {this.useGod: true}) {
+    contentType = new ContentType('application', 'javascript');
+  }
+
+  @override
+  Future send(HttpResponse response) async {
+    await super.send(response);
+    response.write('$callbackName(');
+    response.write(useGod ? god.serialize(data) : JSON.encode(data));
+    response.write(')');
   }
 }
 
