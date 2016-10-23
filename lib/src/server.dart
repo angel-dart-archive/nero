@@ -6,11 +6,18 @@ import 'response.dart';
 import 'router.dart';
 
 class Nero extends Router {
+  final StreamController<HttpRequest> _beforeProcessed = new StreamController<HttpRequest>.broadcast();
+  final StreamController<HttpRequest> _afterProcessed = new StreamController<HttpRequest>.broadcast();
+  Stream<HttpRequest> get beforeProcessed => _beforeProcessed.stream;
+  Stream<HttpRequest> get afterProcessed => _afterProcessed.stream;
+
   Nero({bool debug: false}) {
     this.debug = debug;
   }
 
   Future handleRequest(HttpRequest request) async {
+    _beforeProcessed.add(request);
+
     final route = resolve(request.uri.toString());
 
     if (route == null) {
@@ -28,6 +35,7 @@ class Nero extends Router {
         final result = pipelineCallback(it, req);
         final Response res = result is Future ? await result : result;
         await res.send(request.response);
+        _afterProcessed.add(request);
         await request.response.close();
       }
     }
