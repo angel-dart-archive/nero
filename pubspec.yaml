@@ -1,0 +1,17 @@
+name: nero
+description: Microframework based on angel_route.
+version: 1.0.0-dev
+author: Tobe O <thosakwe@gmail.com>
+homepage: https://github.com/thosakwe/nero
+environment:
+  sdk: ">=1.18.0"
+dependencies:
+  angel_route: ^1.0.0-dev
+  body_parser: ^1.0.0-dev
+  heaven: ^1.0.0-dev
+  json_god: ^2.0.0-beta
+  mime: ^0.9.3
+  path: ^1.4.0
+dev_dependencies:
+  http: ^0.11.3
+  test: ^0.12.15
