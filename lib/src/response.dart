@@ -18,6 +18,7 @@ class Response {
   factory Response.download(File file) => new _FileResponse(file)
     ..headers['Content-Disposition'] =
         'attachment; filename="${basename(file.path)}"';
+  factory Response.empty() => new _EmptyResponse();
   factory Response.file(File file) => new _FileResponse(file);
   factory Response.html(String html) => new _HtmlResponse(html);
   factory Response.text(String text) => new _TextResponse(text);
@@ -42,6 +43,23 @@ class Response {
   }
 }
 
+class _BlobResponse extends Response {
+  final List<int> blob;
+
+  _BlobResponse(this.blob);
+
+  @override
+  Future send(HttpResponse response) async {
+    await super.send(response);
+    response.add(blob);
+  }
+}
+
+class _EmptyResponse extends Response {
+  @override
+  Future send(HttpResponse response) => new Future(() {});
+}
+
 class _FileResponse extends Response {
   final File file;
 
@@ -53,18 +71,6 @@ class _FileResponse extends Response {
   Future send(HttpResponse response) async {
     await super.send(response);
     await response.addStream(file.openRead());
-  }
-}
-
-class _BlobResponse extends Response {
-  final List<int> blob;
-
-  _BlobResponse(this.blob);
-
-  @override
-  Future send(HttpResponse response) async {
-    await super.send(response);
-    response.add(blob);
   }
 }
 

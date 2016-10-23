@@ -6,8 +6,10 @@ import 'response.dart';
 import 'router.dart';
 
 class Nero extends Router {
-  final StreamController<HttpRequest> _beforeProcessed = new StreamController<HttpRequest>.broadcast();
-  final StreamController<HttpRequest> _afterProcessed = new StreamController<HttpRequest>.broadcast();
+  final StreamController<HttpRequest> _beforeProcessed =
+      new StreamController<HttpRequest>.broadcast();
+  final StreamController<HttpRequest> _afterProcessed =
+      new StreamController<HttpRequest>.broadcast();
   Stream<HttpRequest> get beforeProcessed => _beforeProcessed.stream;
   Stream<HttpRequest> get afterProcessed => _afterProcessed.stream;
 
@@ -18,7 +20,7 @@ class Nero extends Router {
   Future handleRequest(HttpRequest request) async {
     _beforeProcessed.add(request);
 
-    final route = resolve(request.uri.toString());
+    final route = resolve(request.uri.toString())?.indexRoute;
 
     if (route == null) {
       final result = on404(await Request.from(request, null));
@@ -30,7 +32,8 @@ class Nero extends Router {
       final it = route.handlerSequence.iterator;
 
       if (!it.moveNext()) {
-        throw new Exception('Each route must have at least one handler mapped to it.');
+        throw new Exception(
+            'Each route must have at least one handler mapped to it.');
       } else {
         final result = pipelineCallback(it, req);
         final Response res = result is Future ? await result : result;

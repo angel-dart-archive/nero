@@ -4,8 +4,8 @@ import 'defs.dart';
 class Router extends angel.Router {
   Router({angel.Route root}) : super(root: root);
 
-  _PipedRouter chain(RequestMiddleware middleware) =>
-      new _PipedRouter(this, middleware);
+  _ChainedRouter chain(RequestMiddleware middleware) =>
+      new _ChainedRouter(this, middleware);
 
   @override
   angel.Route group(Pattern path, void callback(Router router),
@@ -59,13 +59,13 @@ class Router extends angel.Router {
       super.mount(path, router, hooked: hooked, namespace: namespace);
 }
 
-class _PipedRouter extends Router {
+class _ChainedRouter extends Router {
   final List<RequestMiddleware> _handlers = [];
   Router _root;
 
-  _PipedRouter.empty();
+  _ChainedRouter.empty();
 
-  _PipedRouter(Router root, RequestMiddleware middleware) {
+  _ChainedRouter(Router root, RequestMiddleware middleware) {
     this._root = root;
     _handlers.add(middleware);
   }
@@ -118,8 +118,8 @@ class _PipedRouter extends Router {
   }
 
   @override
-  _PipedRouter chain(RequestMiddleware middleware) {
-    final piped = new _PipedRouter.empty().._root = _root;
+  _ChainedRouter chain(RequestMiddleware middleware) {
+    final piped = new _ChainedRouter.empty().._root = _root;
     piped._handlers.addAll([]
       ..addAll(_handlers)
       ..add(middleware));
