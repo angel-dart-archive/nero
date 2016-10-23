@@ -12,7 +12,7 @@ main() {
   
   app.chain((req, next) async {
     req.properties['user'] = await someQuery(req.params.id);
-  }).get('/user:id', (req) {
+  }).get('/user/:id', (req) {
     return new Response.json(req.user);
   });
 }
