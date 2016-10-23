@@ -2,7 +2,7 @@ name: nero
 description: Microframework based on angel_route.
 version: 1.0.0-dev
 author: Tobe O <thosakwe@gmail.com>
-homepage: https://github.com/thosakwe/nero
+homepage: https://github.com/angel-dart/nero
 environment:
   sdk: ">=1.18.0"
 dependencies:
