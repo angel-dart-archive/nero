@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$/../angel_route">
       <excludeFolder url="file://$MODULE_DIR$/../angel_route/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/../angel_route/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/../angel_route/test/method/packages" />
       <excludeFolder url="file://$MODULE_DIR$/../angel_route/test/packages" />
       <excludeFolder url="file://$MODULE_DIR$/../angel_route/test/route/packages" />
       <excludeFolder url="file://$MODULE_DIR$/../angel_route/test/router/packages" />

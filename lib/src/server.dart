@@ -7,10 +7,12 @@ import 'router.dart';
 
 class Nero extends Router {
   final StreamController<HttpRequest> _beforeProcessed =
-      new StreamController<HttpRequest>.broadcast();
+  new StreamController<HttpRequest>.broadcast();
   final StreamController<HttpRequest> _afterProcessed =
-      new StreamController<HttpRequest>.broadcast();
+  new StreamController<HttpRequest>.broadcast();
+
   Stream<HttpRequest> get beforeProcessed => _beforeProcessed.stream;
+
   Stream<HttpRequest> get afterProcessed => _afterProcessed.stream;
 
   Nero({bool debug: false}) {
@@ -20,7 +22,14 @@ class Nero extends Router {
   Future handleRequest(HttpRequest request) async {
     _beforeProcessed.add(request);
 
-    final route = resolve(request.uri.toString())?.indexRoute;
+    var route;
+
+    if (request.uri.toString() == '/') {
+      route = root.indexRoute;
+    } else {
+      route =
+          resolve(request.uri.toString(), method: request.method)?.indexRoute;
+    }
 
     if (route == null) {
       final result = on404(await Request.from(request, null));
@@ -52,7 +61,8 @@ class Nero extends Router {
     return server;
   }
 
-  RequestHandler on404 = (Request req) => new Response.html('''
+  RequestHandler on404 = (Request req) =>
+  new Response.html('''
       <!DOCTYPE html>
       <html>
         <head>
@@ -64,7 +74,8 @@ class Nero extends Router {
           <i>The file '${req.uri}' does not exist on this server.</i>
         </body>
       </html>
-      ''')..statusCode = HttpStatus.NOT_FOUND;
+      ''')
+    ..statusCode = HttpStatus.NOT_FOUND;
 
   Future<Response> pipelineCallback(Iterator it, Request req) {
     if (it.current is RequestMiddleware) {
