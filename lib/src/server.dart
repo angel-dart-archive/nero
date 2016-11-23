@@ -22,23 +22,28 @@ class Nero extends Router {
   Future handleRequest(HttpRequest request) async {
     _beforeProcessed.add(request);
 
-    var route;
+    final resolved = [];
 
     if (request.uri.toString() == '/') {
-      route = root.indexRoute;
+      resolved.add(root.indexRoute);
     } else {
-      route =
-          resolve(request.uri.toString(), method: request.method)?.indexRoute;
+      resolved.addAll(resolveAll(request.uri.toString(), method: request.method));
     }
 
-    if (route == null) {
+    if (resolved.isEmpty) {
       final result = on404(await Request.from(request, null));
       final Response res = result is Future ? await result : result;
       await res.send(request.response);
       await request.response.close();
     } else {
-      final req = await Request.from(request, route);
-      final it = route.handlerSequence.iterator;
+      final req = await Request.from(request, resolved.first);
+      final pipeline = [];
+
+      for (final route in resolved) {
+        pipeline.addAll(route.handlerSequence);
+      }
+
+      final it = pipeline.iterator;
 
       if (!it.moveNext()) {
         throw new Exception(
