@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:angel_route/angel_route.dart' as angel;
 import 'defs.dart';
 import 'request.dart';
 import 'response.dart';
@@ -7,9 +8,9 @@ import 'router.dart';
 
 class Nero extends Router {
   final StreamController<HttpRequest> _beforeProcessed =
-  new StreamController<HttpRequest>.broadcast();
+      new StreamController<HttpRequest>.broadcast();
   final StreamController<HttpRequest> _afterProcessed =
-  new StreamController<HttpRequest>.broadcast();
+      new StreamController<HttpRequest>.broadcast();
 
   Stream<HttpRequest> get beforeProcessed => _beforeProcessed.stream;
 
@@ -21,29 +22,24 @@ class Nero extends Router {
 
   Future handleRequest(HttpRequest request) async {
     _beforeProcessed.add(request);
+    var requestedUrl = request.uri.toString();
 
-    final resolved = [];
+    final resolved =
+        resolveAll(requestedUrl, requestedUrl, method: request.method);
 
-    if (request.uri.toString() == '/') {
-      resolved.add(root.indexRoute);
-    } else {
-      resolved.addAll(resolveAll(request.uri.toString(), method: request.method));
-    }
+    angel.Route route = resolved.isNotEmpty ? resolved.first.route : null;
+    var req = await Request.from(request, route);
+
+    for (final result in resolved) req.params.addAll(result.allParams);
 
     if (resolved.isEmpty) {
-      final result = on404(await Request.from(request, null));
+      final result = on404(req);
       final Response res = result is Future ? await result : result;
       await res.send(request.response);
       await request.response.close();
     } else {
-      final req = await Request.from(request, resolved.first);
-      final pipeline = [];
-
-      for (final route in resolved) {
-        pipeline.addAll(route.handlerSequence);
-      }
-
-      final it = pipeline.iterator;
+      var m = new angel.MiddlewarePipeline(resolved);
+      var pipeline = m.handlers, it = pipeline.iterator;
 
       if (!it.moveNext()) {
         throw new Exception(
@@ -66,8 +62,7 @@ class Nero extends Router {
     return server;
   }
 
-  RequestHandler on404 = (Request req) =>
-  new Response.html('''
+  RequestHandler on404 = (Request req) => new Response.html('''
       <!DOCTYPE html>
       <html>
         <head>
@@ -79,8 +74,7 @@ class Nero extends Router {
           <i>The file '${req.uri}' does not exist on this server.</i>
         </body>
       </html>
-      ''')
-    ..statusCode = HttpStatus.NOT_FOUND;
+      ''')..statusCode = HttpStatus.NOT_FOUND;
 
   Future<Response> pipelineCallback(Iterator it, Request req) {
     if (it.current is RequestMiddleware) {

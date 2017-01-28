@@ -2,7 +2,7 @@
 Microframework based on Express and angel_route. This framework is unrelated to
 [Angel](https://github.com/angel-dart/angel).
 
-Documentation soon to come.
+This is an experimental library, don't expect any future support.
 
 ```dart
 main() {

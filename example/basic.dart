@@ -9,8 +9,8 @@ main() {
 
   app.get('/', (req) => new Response.file(indexFile));
 
-  app.get(new RegExp(r'^file/([^$]+)$'), (req) async {
-    final file = new File(req.match[1]);
+  app.get(r'/file/:path(.+)', (req) async {
+    final file = new File(req.params['path']);
 
     if (!await file.exists()) {
       return new Response.html('''

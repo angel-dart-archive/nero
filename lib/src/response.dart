@@ -151,7 +151,7 @@ class _RedirectResponse extends Response {
   String to;
 
   _RedirectResponse(this.to, {int code}) {
-    statusCode = code ?? 301;
+    statusCode = code ?? 302;
     headers[HttpHeaders.LOCATION] = to;
   }
 }
